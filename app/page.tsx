@@ -1,101 +1,233 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useState } from 'react'
+import { WebApp } from '@twa-dev/types'
+
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp: WebApp
+    }
+  }
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [user, setUser] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [notification, setNotification] = useState('')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp
+      tg.ready()
+
+      const initData = tg.initData || ''
+      const initDataUnsafe = tg.initDataUnsafe || {}
+
+      if (initDataUnsafe.user) {
+        fetch('/api/user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(initDataUnsafe.user),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              setError(data.error)
+            } else {
+              setUser(data)
+            }
+          })
+          .catch((err) => {
+            setError('Failed to fetch user data')
+          })
+      } else {
+        setError('No user data available')
+      }
+    } else {
+      setError('This app should be opened in Telegram')
+    }
+  }, [])
+
+  const handleIncreasePoints = async () => {
+    if (!user) return
+
+    try {
+      const res = await fetch('/api/increase-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ telegramId: user.telegramId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setUser({ ...user, points: data.points })
+        setNotification('Points increased successfully!')
+        setTimeout(() => setNotification(''), 3000)
+      } else {
+        setError('Failed to increase points')
+      }
+    } catch (err) {
+      setError('An error occurred while increasing points')
+    }
+  }
+
+  if (error) {
+    return <div className="container mx-auto p-4 text-red-500">{error}</div>
+  }
+
+  if (!user) return <div className="container mx-auto p-4">Loading...</div>
+
+  return (
+    <>
+  <meta charSet="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+  />
+  <link rel="stylesheet" href="style.css" />
+  <title>GalaxyTon</title>
+  <header>
+    <div className="container-fluid">
+      <nav className="navbar navbar-expand-lg navbar-light">
+        <div className="header-inner d-flex justify-content-between align-items-center">
+          <a className="navbar-brand flex-shrink-0" href="#">
+            {" "}
+            Big Farm
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="header-content d-flex align-items-center justify-content-end">
+            <form className="d-flex justify-content-end align-items-center">
+              <div className="search-icon">
+                <i className="fa fa-search" aria-hidden="true" />
+                <input
+                  className="form-control"
+                  type="search"
+                  placeholder="Search"
+                  aria-label="Search"
+                />
+              </div>
+              <label className="switch flex-shrink-0 mb-0">
+                <input id="checkbox" type="checkbox" />
+                <span className="slider round" />
+              </label>
+            </form>
+            <a href="#" className="profile">
+              <img
+                src="https://yudiz.com/codepen/nft-store/user-pic1.svg"
+                alt="user-image"
+              />
+              User123
+            </a>
+            <a href="#" className="notification">
+              <i className="fa fa-bell" aria-hidden="true" />
+            </a>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <button className="hamburger-icon">
+          <span />
+          <span />
+          <span />
+        </button>
+      </nav>
     </div>
-  );
-}
+  </header>
+  <div className="nft-store">
+    <div className="container-fluid">
+      <div className="nft-store-inner d-flex">
+        <div className="menu-links">
+          <ul>
+            <li className="nav-item active">
+              <a href="#" className="d-flex align-items-center nav-link">
+                <i className="fa fa-home" aria-hidden="true" />
+                <span>Home</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a href="#" className="d-flex align-items-center nav-link">
+                <i className="fa fa-tasks" aria-hidden="true" />
+                <span>Tasks</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                href="dailylogin.html"
+                className="d-flex align-items-center nav-link"
+              >
+                <i className="fa fa-calendar" aria-hidden="true" />
+                <span>Daily Login</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                href="https://mywallet-blue.vercel.app/"
+                className="d-flex align-items-center nav-link"
+              >
+                <i className="fa fa-credit-card" aria-hidden="true" />
+                <span>Wallet Connect</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                href="Invite.html"
+                className="d-flex align-items-center nav-link"
+              >
+                <i className="fa fa-money" aria-hidden="true" />
+                <span>Friends</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a href="#" className="d-flex align-items-center nav-link">
+                <i className="fa fa-star" aria-hidden="true" />
+                <span>Leaderboard</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div id="quiz-container">
+          <div id="question-container">
+            <h2 id="question">Question</h2>
+            <ul id="answer-buttons">
+              <li>
+                <button className="answer-btn">Answer 1</button>
+              </li>
+              <li>
+                <button className="answer-btn">Answer 2</button>
+              </li>
+              <li>
+                <button className="answer-btn">Answer 3</button>
+              </li>
+              <li>
+                <button className="answer-btn">Answer 4</button>
+              </li>
+            </ul>
+          </div>
+          <div id="controls">
+            <button id="next-btn" className="hide">
+              Next
+            </button>
+            <p id="score">Score: 0</p>
+          </div>
+          {/* Display the separate and combined points */}
+          <div id="daily-login-score">Daily Login Points: 0</div>{" "}
+          {/* Daily login points displayed here */}
+          <div id="quiz-score">Quiz Points: 0</div>{" "}
+          {/* Quiz points displayed here */}
+          <div id="combined-score">Total Score: 0</div>{" "}
+          {/* Combined score displayed here */}
+        </div>
+      </div>
+      {/* Include daily login script */}
+      {/* Include quiz script */}
+    </div>
+  </div>
+</>
+      )}
+  
