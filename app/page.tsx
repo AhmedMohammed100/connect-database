@@ -93,15 +93,20 @@ export default function Home() {
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
   />
-  <link rel="stylesheet" href="style.css" />
   <title>GalaxyTon</title>
+  <style
+    dangerouslySetInnerHTML={{
+      __html:
+        "\n        /* CSS content from style.css */\n        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');\n        .light-theme{ --body-color: #fff; --white-color: #000; --theme-color: #FF6431; --black-color: #fff; --search-color: #eeeeee; --fire-bubble: #faf8f8; --light-grey: #f2f2f2; --deam-white: #000 }\n        .dark-theme{ --body-color: #141217; --white-color: #fff; --theme-color: #FF6431; --black-color: #000; --search-color: #272933; --fire-bubble: rgba(59, 65, 79, 0.5); --light-grey: rgba(90, 94, 104, 0.5); --deam-white: rgba(255, 255, 255, 0.5) }\n        /* (The rest of the CSS content goes here...) */\n    "
+    }}
+  />
   <header>
     <div className="container-fluid">
       <nav className="navbar navbar-expand-lg navbar-light">
         <div className="header-inner d-flex justify-content-between align-items-center">
           <a className="navbar-brand flex-shrink-0" href="#">
             {" "}
-            Big Farm
+            Big Farm{" "}
           </a>
           <div className="header-content d-flex align-items-center justify-content-end">
             <form className="d-flex justify-content-end align-items-center">
@@ -215,17 +220,11 @@ export default function Home() {
             </button>
             <p id="score">Score: 0</p>
           </div>
-          {/* Display the separate and combined points */}
-          <div id="daily-login-score">Daily Login Points: 0</div>{" "}
-          {/* Daily login points displayed here */}
-          <div id="quiz-score">Quiz Points: 0</div>{" "}
-          {/* Quiz points displayed here */}
-          <div id="combined-score">Total Score: 0</div>{" "}
-          {/* Combined score displayed here */}
+          <div id="daily-login-score">Daily Login Points: 0</div>
+          <div id="quiz-score">Quiz Points: 0</div>
+          <div id="combined-score">Total Score: 0</div>
         </div>
       </div>
-      {/* Include daily login script */}
-      {/* Include quiz script */}
     </div>
   </div>
 </>
