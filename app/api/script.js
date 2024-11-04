@@ -255,7 +255,7 @@ $(document).ready(function () {
     
             if (timeRemaining <= 0) {
                 clearInterval(timer);
-                questionElement.innerText = "A new day has started! You can now retake the quiz.";
+                questionElement.innerText = "A new day has started! You can now retake the quiz";
             } else {
                 updateNextDayTimerDisplay(timeRemaining);
             }
